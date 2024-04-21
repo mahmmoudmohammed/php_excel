@@ -7,18 +7,29 @@ use PhpExcel\Database\Connection;
 use PhpExcel\DTOs\CustomerDTO;
 use PhpExcel\DTOs\InvoiceDTO;
 use PhpExcel\Repositories\CustomerRepository;
+use PhpExcel\Repositories\CustomerRepositoryInterface;
 use PhpExcel\Repositories\InvoiceRepository;
-use PhpExcel\Validators\InvoiceValidator;
+use PhpExcel\Repositories\InvoiceRepositoryInterface;
+use PhpExcel\Validators\Validator;
 
 class ImportController
 {
-    private Connection $connection;
-    private $pdo;
+    private \PDO $pdo;
+    private Validator $invoiceValidator;
+    private CustomerRepositoryInterface $customerRepository;
+    private InvoiceRepositoryInterface $invoiceRepository;
 
-    public function __construct(Connection $connection)
+    public function __construct(
+        Connection         $connection,
+        Validator          $invoiceValidator,
+        CustomerRepository $customerRepository,
+        InvoiceRepository  $invoiceRepository
+    )
     {
-        $this->connection = $connection;
         $this->pdo = $connection->getConnection();
+        $this->customerRepository = $customerRepository;
+        $this->invoiceRepository = $invoiceRepository;
+        $this->invoiceValidator = $invoiceValidator;
     }
 
     public function store(array $rows): array
@@ -30,12 +41,13 @@ class ImportController
                 // Considering that addresses and products already inserted
 
                 // Create customer from name
-                $customer_id = (new CustomerRepository($this->connection))
-                    ->create(CustomerDTO::create($row[2]));
+                $customer_id = $this->customerRepository->create(
+                    CustomerDTO::create($row[2])
+                );
 
                 // Validate and Create Invoice
-                $invoice = (new InvoiceValidator($row))->validate();
-                $createdInvoices [] = (new InvoiceRepository($this->connection))->create(
+                $invoice = $this->invoiceValidator->validate($row);
+                $createdInvoices [] = $this->invoiceRepository->create(
                     InvoiceDTO::create(
                         $invoice['id'],
                         $invoice['date'],
