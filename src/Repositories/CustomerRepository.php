@@ -5,7 +5,7 @@ namespace PhpExcel\Repositories;
 use PhpExcel\Database\Connection;
 use PhpExcel\DTOs\CustomerDTO;
 
-class CustomerRepository
+class CustomerRepository implements CustomerRepositoryInterface
 {
     private $pdo;
 

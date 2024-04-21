@@ -4,9 +4,8 @@ namespace PhpExcel\Repositories;
 
 use PhpExcel\Database\Connection;
 use PhpExcel\DTOs\InvoiceDTO;
-use PDOException;
 
-class InvoiceRepository
+class InvoiceRepository implements InvoiceRepositoryInterface
 {
     private $pdo;
 
