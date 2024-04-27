@@ -3,5 +3,5 @@ namespace PhpExcel\Validators;
 
 interface Validator {
 
-    public function validate():array;
+    public function validate(array $row):array;
 }

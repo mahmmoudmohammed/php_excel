@@ -2,9 +2,11 @@
 require __DIR__ . '/vendor/autoload.php';
 
 use PhpExcel\Controller\ImportController;
-use PhpExcel\Controller\InvoiceController;
 use PhpExcel\Database\PDOConnection;
 use PhpExcel\Excel\ExcelImporter;
+use PhpExcel\Repositories\CustomerRepository;
+use PhpExcel\Repositories\InvoiceRepository;
+use PhpExcel\Validators\InvoiceValidator;
 
 $dbConfig = require __DIR__ . '/config/connection.php';
 $dsn      = $dbConfig['pdo']['dsn'];
@@ -18,11 +20,15 @@ $excelFilePath    = 'data.xlsx';
 $importedData    = (new ExcelImporter($excelFilePath))->importData();
 //echo '<pre>' , var_dump($importedData) , '</pre>';
 
-$invoices = (new ImportController($dbConnection))->store($importedData);
-echo '<pre>' , var_dump($invoices) , '</pre>';
+$invoices = (
+new ImportController(
+    $dbConnection,
+    new InvoiceValidator(),
+    new CustomerRepository($dbConnection),
+    new InvoiceRepository($dbConnection)
+))->store($importedData);
+
+//echo '<pre>' , var_dump($invoices) , '</pre>';
 
 echo "Data imported successfully.\n";
-
-// list all invoices;
-(new InvoiceController($dbConnection))->showAllInvoices();
 
